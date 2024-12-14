@@ -1,5 +1,7 @@
-import Editor from '@monaco-editor/react'
 import { loader } from '@monaco-editor/react'
+import CodeEditor from './components/CodeEditor'
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
+import ExecutionResult from './components/ExecutionResult'
 
 loader.config({
   paths: {
@@ -10,13 +12,15 @@ loader.config({
 function App(): JSX.Element {
   return (
     <>
-      <Editor
-        height="100vh"
-        width="100%"
-        language="javascript"
-        theme="dark"
-        value="// write your code here"
-      />
+      <PanelGroup direction="horizontal">
+        <Panel minSize={20}>
+          <CodeEditor />
+        </Panel>
+        <PanelResizeHandle />
+        <Panel>
+          <ExecutionResult />
+        </Panel>
+      </PanelGroup>
     </>
   )
 }
