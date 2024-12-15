@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { AssetServer } from '../protocols/asset-server'
 import { AssetUrl } from '../protocols/asset-url'
+import runTypescript from '../runners/typescript/runner'
 
 function createWindow(): void {
   // Create the browser window.
@@ -15,7 +16,8 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      contextIsolation: true, // protect against prototype pollution,
     }
   })
 
@@ -37,6 +39,12 @@ function createWindow(): void {
   }
 }
 
+// Registers custom schemes as privileged with specific privileges.
+// This is used to define a custom protocol scheme ('app-asset') that has elevated privileges.
+// The privileges include:
+// - standard: Allows the scheme to be treated as a standard scheme.
+// - supportFetchAPI: Enables the use of the Fetch API with this scheme.
+// - bypassCSP: Allows the scheme to bypass Content Security Policy (CSP) checks.
 protocol.registerSchemesAsPrivileged([
   {
     scheme: 'app-asset',
@@ -50,10 +58,21 @@ protocol.registerSchemesAsPrivileged([
 
 const server = new AssetServer()
 
+ipcMain.handle('run-code', (_, code: string) => {
+  console.log('run-code', code)
+  runTypescript(code)
+})
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  // Handles requests for the 'app-asset' custom protocol.
+  // The handler function processes the incoming request and determines the source of the requested asset.
+  // It first creates a URL object from the request URL.
+  // Then, it creates an AssetUrl instance to encapsulate the URL and provide additional functionality.
+  // If the asset is identified as a Node.js module, it fetches the asset from the Node.js modules directory using server.fromNodeModules().
+  // Otherwise, it fetches the asset from the public directory using server.fromPublic().
   protocol.handle('app-asset', (request) => {
     const urlStringToURL = new URL(request.url)
     const asset = new AssetUrl(urlStringToURL)
@@ -74,9 +93,6 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
-
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
 
