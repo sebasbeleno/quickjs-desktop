@@ -4,6 +4,8 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import ExecutionResult from './components/ExecutionResult'
 import { ipcMain, ipcRenderer } from 'electron'
 import electron from 'electron'
+import { Provider } from 'react-redux'
+import { store } from './store'
 
 loader.config({
   paths: {
@@ -12,12 +14,12 @@ loader.config({
 })
 
 function App(): JSX.Element {
-  function handleCkick(): void {
+  /* function handleCkick(): void {
     console.log(window.api.invoke('run-code', 'hello'))
-  }
+  } */
   return (
-    <>
-      {/* <PanelGroup direction="horizontal">
+    <Provider store={store}>
+      <PanelGroup direction="horizontal">
         <Panel minSize={20}>
           <CodeEditor />
         </Panel>
@@ -25,11 +27,8 @@ function App(): JSX.Element {
         <Panel>
           <ExecutionResult />
         </Panel>
-      </PanelGroup> */}
-      <div className="btn" onClick={handleCkick}>
-        <span>hola</span>
-      </div>
-    </>
+      </PanelGroup>
+    </Provider>
   )
 }
 
