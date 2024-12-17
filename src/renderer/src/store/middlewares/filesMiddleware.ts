@@ -1,6 +1,7 @@
 import { createListenerMiddleware, isAnyOf, TypedStartListening } from '@reduxjs/toolkit'
 import { AppDispach, RootState } from '..'
 import { updateFileContent } from '../slices/filesSlice'
+import runTypescript from '../../runners/typescript/runner'
 
 export const filesListenerMiddleware = createListenerMiddleware()
 
@@ -15,7 +16,7 @@ startAppListening({
     const dispatch = listenerApi.dispatch
 
     if (updateFileContent.match(action)) {
-      console.log('File content updated', action.payload)
+      runTypescript(action.payload.content)
     }
   }
 })

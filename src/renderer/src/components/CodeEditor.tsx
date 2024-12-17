@@ -6,8 +6,6 @@ import { useDispatch, useSelector } from 'react-redux'
 const CodeEditor: React.FC = () => {
   const currentFile = useSelector(selectCurrentFile)
   const dispatch = useDispatch()
-
-  console.log(currentFile)
   return (
     <Editor
       height="100vh"

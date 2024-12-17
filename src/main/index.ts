@@ -4,7 +4,8 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { AssetServer } from '../protocols/asset-server'
 import { AssetUrl } from '../protocols/asset-url'
-import runTypescript from '../runners/typescript/runner'
+import vm from 'vm'
+import parseJavaScript from '../runners/typescript/parser'
 
 function createWindow(): void {
   // Create the browser window.
@@ -17,7 +18,7 @@ function createWindow(): void {
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
-      contextIsolation: true, // protect against prototype pollution,
+      contextIsolation: true // protect against prototype pollution,
     }
   })
 
@@ -59,8 +60,46 @@ protocol.registerSchemesAsPrivileged([
 const server = new AssetServer()
 
 ipcMain.handle('run-code', (_, code: string) => {
-  console.log('run-code', code)
-  runTypescript(code)
+  return new Promise((resolve, reject) => {
+    const ast = parseJavaScript(code)
+    const results = new Array(ast?.loc?.end.line).fill(undefined)
+
+    const sandbox = {
+      Logger: (lineIndex: number, ...args: never[]): void => {
+        const formattedValue = args
+          .map((arg) => (typeof arg === 'object' ? JSON.stringify(arg) : String(arg)))
+          .join(' ')
+
+        if (results[lineIndex - 1] === undefined) {
+          results[lineIndex - 1] = formattedValue + ' '
+        } else {
+          results[lineIndex - 1] += formattedValue + ' '
+        }
+      }
+    }
+
+    vm.createContext(sandbox)
+
+    if (!ast) {
+      return resolve(results)
+    }
+
+    ast.body.forEach((node) => {
+      const nodeSource = code.slice(node.range[0], node.range[1])
+
+      if (node.type === 'ExpressionStatement' && node.expression.type === 'Literal') {
+        results[node.loc.start.line - 1] = node.expression.value
+      }
+
+      try {
+        vm.runInContext(nodeSource, sandbox)
+      } catch (error) {
+        results[node.loc.start.line - 1] = `Error: ${error.message}`
+      }
+    })
+
+    resolve(results)
+  })
 })
 
 // This method will be called when Electron has finished

@@ -36,11 +36,16 @@ export const fileSlice = createSlice({
       if (file) {
         file.content = content
       }
+    },
+
+    updateCodeExecutionResult(state, action: PayloadAction<string>) {
+      state.currentFile.codeExecutionResult = action.payload
     }
   }
 })
 
-export const { addFile, updateFile, updateFileContent } = fileSlice.actions
+export const { addFile, updateFile, updateFileContent, updateCodeExecutionResult } =
+  fileSlice.actions
 
 export const {
   selectIds: selectFileIds,
