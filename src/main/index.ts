@@ -5,7 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import { AssetServer } from '../protocols/asset-server'
 import { AssetUrl } from '../protocols/asset-url'
 import vm from 'vm'
-import parseJavaScript from '../runners/typescript/parser'
+import parseJavaScript from '../renderer/src/runners/typescript/parser'
 
 function createWindow(): void {
   // Create the browser window.
