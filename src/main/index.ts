@@ -19,7 +19,8 @@ function createWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
       contextIsolation: true // protect against prototype pollution,
-    }
+    },
+    titleBarStyle: 'hidden'
   })
 
   mainWindow.on('ready-to-show', () => {

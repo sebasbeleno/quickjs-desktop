@@ -54,6 +54,30 @@ function transformCode(ast: Program): string {
           }
         }
       }
+
+      if (node.type === 'ExpressionStatement' && node.expression.type === 'CallExpression') {
+        return {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'CallExpression',
+            callee: {
+              type: 'Identifier',
+              name: 'Logger'
+            },
+            arguments: [
+              {
+                type: 'Literal',
+                value: node.loc.start.line
+              },
+              {
+                type: 'CallExpression',
+                callee: node.expression.callee,
+                arguments: node.expression.arguments
+              }
+            ]
+          }
+        }
+      }
     }
   })
 
