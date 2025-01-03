@@ -101,6 +101,26 @@ function transformCode(ast: Program): string {
           }
         }
       }
+
+      if (node.type === 'ExpressionStatement' && node.expression.type === 'Literal') {
+        return {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'CallExpression',
+            callee: {
+              type: 'Identifier',
+              name: 'Logger'
+            },
+            arguments: [
+              {
+                type: 'Literal',
+                value: node.loc.start.line
+              },
+              node.expression
+            ]
+          }
+        }
+      }
     }
   })
 

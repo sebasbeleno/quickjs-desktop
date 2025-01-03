@@ -88,10 +88,6 @@ ipcMain.handle('run-code', (_, code: string) => {
     ast.body.forEach((node) => {
       const nodeSource = code.slice(node.range[0], node.range[1])
 
-      if (node.type === 'ExpressionStatement' && node.expression.type === 'Literal') {
-        results[node.loc.start.line - 1] = node.expression.value
-      }
-
       try {
         vm.runInContext(nodeSource, sandbox)
       } catch (error) {

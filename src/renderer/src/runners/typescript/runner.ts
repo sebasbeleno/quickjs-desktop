@@ -26,6 +26,8 @@ function runTypescript(code: string): void {
     return
   }
 
+  console.log(ast)
+
   const transformedCode = transformCode(ast)
 
   window.api
