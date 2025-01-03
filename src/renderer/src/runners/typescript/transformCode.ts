@@ -29,7 +29,6 @@ function transformCode(ast: Program): string {
       }
 
       // replace binary expression with custom eval function
-
       if (node.type === 'ExpressionStatement' && node.expression.type === 'BinaryExpression') {
         return {
           type: 'ExpressionStatement',
@@ -55,7 +54,12 @@ function transformCode(ast: Program): string {
         }
       }
 
-      if (node.type === 'ExpressionStatement' && node.expression.type === 'CallExpression') {
+      // when the user is calling a function wrapped in with Logger
+      if (
+        node.type === 'ExpressionStatement' &&
+        node.expression.type === 'CallExpression' &&
+        node.expression.callee.name !== 'Logger'
+      ) {
         return {
           type: 'ExpressionStatement',
           expression: {
@@ -79,6 +83,7 @@ function transformCode(ast: Program): string {
         }
       }
 
+      // this scenario is when the user is calling a variable
       if (node.type === 'ExpressionStatement' && node.expression.type === 'Identifier') {
         return {
           type: 'ExpressionStatement',
@@ -102,6 +107,7 @@ function transformCode(ast: Program): string {
         }
       }
 
+      // this scenario is when the user is calling a literal. e.g. 1, 'hello', true
       if (node.type === 'ExpressionStatement' && node.expression.type === 'Literal') {
         return {
           type: 'ExpressionStatement',
@@ -117,6 +123,30 @@ function transformCode(ast: Program): string {
                 value: node.loc.start.line
               },
               node.expression
+            ]
+          }
+        }
+      }
+
+      if (node.type === 'ExpressionStatement' && node.expression.type === 'UnaryExpression') {
+        return {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'CallExpression',
+            callee: {
+              type: 'Identifier',
+              name: 'Logger'
+            },
+            arguments: [
+              {
+                type: 'Literal',
+                value: node.loc.start.line
+              },
+              {
+                type: 'UnaryExpression',
+                operator: node.expression.operator,
+                argument: node.expression.argument
+              }
             ]
           }
         }
