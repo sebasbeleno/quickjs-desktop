@@ -20,7 +20,8 @@ function createWindow(): void {
       sandbox: false,
       contextIsolation: true // protect against prototype pollution,
     },
-    titleBarStyle: 'hidden'
+    titleBarStyle: 'default',
+    title: 'QuickJS'
   })
 
   mainWindow.on('ready-to-show', () => {

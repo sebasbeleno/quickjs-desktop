@@ -1,9 +1,14 @@
 import { Editor } from '@monaco-editor/react'
+import { EditorTheme } from '@renderer/config/themeOptions'
 import { selectCurrentFile, updateFileContent } from '@renderer/store/slices/filesSlice'
 import { getLanguageFromFilename } from '@renderer/utils'
 import { useDispatch, useSelector } from 'react-redux'
 
-const CodeEditor: React.FC = () => {
+interface CodeEditorProps {
+  theme: EditorTheme
+}
+
+const CodeEditor: React.FC<CodeEditorProps> = ({ theme }: CodeEditorProps) => {
   const currentFile = useSelector(selectCurrentFile)
   const dispatch = useDispatch()
   return (
@@ -32,6 +37,7 @@ const CodeEditor: React.FC = () => {
         }
       }}
       language={getLanguageFromFilename(currentFile ? currentFile.name : '')}
+      theme={theme}
     />
   )
 }
