@@ -151,6 +151,31 @@ function transformCode(ast: Program): string {
           }
         }
       }
+
+      if (node.type === 'ExpressionStatement' && node.expression.type === 'LogicalExpression') {
+        return {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'CallExpression',
+            callee: {
+              type: 'Identifier',
+              name: 'Logger'
+            },
+            arguments: [
+              {
+                type: 'Literal',
+                value: node.loc.start.line
+              },
+              {
+                type: 'LogicalExpression',
+                left: node.expression.left,
+                right: node.expression.right,
+                operator: node.expression.operator
+              }
+            ]
+          }
+        }
+      }
     }
   })
 
